@@ -69,10 +69,10 @@ public class ProyectoSolr {
                 auxDoc = new TipoDocumento();
                 
                 String[] cadenaId = result[j].split("Document\\s{1,4}");
-
                 auxDoc.addPair("id", cadenaId[1]);
-                auxDoc.addPair("title", result[j + 1]);
-                auxDoc.addPair("text", result[j + 2]);
+                
+                auxDoc.addPair("title", result[j+1].replaceAll("\r\n|\r|\n"," "));
+                auxDoc.addPair("text", result[j+2].replaceAll("\r\n|\r|\n"," "));
 
                 TodosDocs.add(auxDoc);
             }
