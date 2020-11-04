@@ -12,7 +12,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 public class ProyectoSolr {
 
     private final String regexFichero = "glob:**LISA0.0*"; //Expresion regular para la primera parte de la practica // Solo lee 1 fichcero
-    private final String regexParseDocs = "(?<=[0-9]\r)|\n\\*{44}";
+    private final String regexParseDocs = "(?<=Document\\s{1,4}[0-9]{1,4})\r\n|\r\n\r\n|\n\\*{44}\r\n";
     //private String regexFichero = "glob:**LISA[0-5]*";
     private ArrayList<String> FicheroToString;
     private ClienteSolrj solrj;
@@ -51,36 +51,35 @@ public class ProyectoSolr {
     //PARSEO FICHEROS ---------------------------------------------------------------------------------------------
     public void parseDocs() throws SolrServerException, IOException {
         String[] result;
-        // el (?<=) no elimina el delimitador del split -> stackOverflow
-        System.out.println("Numero de ficheros: " + FicheroToString.size());
+        //Lista donde se van guardando los Documentos
+        ArrayList<TipoDocumento> TodosDocs = new ArrayList<>();
 
-        //Para cada fichero leido se parsea
+        //Para cada fichero leido se parsea y se guarda en result
         for (int i = 0; i < FicheroToString.size(); i++) {
+            //Parsea 500 Documentos de 1 fichero
             result = FicheroToString.get(i).split(regexParseDocs);
-            System.out.println("Numero de splits: " + result.length);
 
-            ArrayList<String> fieldName = new ArrayList<>();
-            ArrayList<String> value = new ArrayList<>();
-            //Recorre 
-            for (int j = 0; j < result.length; j++) {
-                //result[0] -- Numero Documento
-                if (j % 2 == 0) {
-                    fieldName.add("title");
-                    value.add(result[j]);
-//                    System.out.println("Documento------------------------------------>>>>>>>>");
-//                    System.out.println(result[j]);
+            TipoDocumento auxDoc;
+           
+            //Recorre 500 Documentos donde --->
+            //result[0] -- Numero Documento
+            //result[1] -- Titulo Documento
+            //result[2] -- Texto Documento
+            for (int j = 0; j < result.length - 1; j += 3) {
+                auxDoc = new TipoDocumento();
+                
+                String[] cadenaId = result[j].split("Document\\s{1,4}");
 
-                } //result[1] -- Contenido Documento
-                else if (j % 2 == 1) {
-                    fieldName.add("doc");
-                    value.add(result[j]);
-//                    System.out.println("Texto--------------------------------------::::::::::");
-//                    System.out.println(result[j]);
+                auxDoc.addPair("id", cadenaId[1]);
+                auxDoc.addPair("title", result[j + 1]);
+                auxDoc.addPair("text", result[j + 2]);
 
-                }
+                TodosDocs.add(auxDoc);
             }
-            solrj.AddDoc(fieldName, value); //Indexar documento a solr
+
         }
+        //Indexa 500 Documentos de 1 fichero
+        solrj.AddDoc(TodosDocs); //Indexar documento a solr
 
     }
 

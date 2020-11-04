@@ -14,14 +14,22 @@ public class ClienteSolrj {
         solr = new HttpSolrClient.Builder("http://localhost:8983/solr/micoleccion").build();
     }
 
-    public void AddDoc(ArrayList<String> fieldName,ArrayList<String> value) throws SolrServerException, IOException {
+    //Le llegan 500 Documentos
+    public void AddDoc(ArrayList<TipoDocumento> Documentos) throws SolrServerException, IOException {
         SolrInputDocument doc = new SolrInputDocument();
         
-        for (int i = 0; i < fieldName.size(); i++) {
-            doc.addField(fieldName.get(i), value.get(i));
+        //Para todos los documentos
+        for (int i = 0; i < Documentos.size(); i++) {
+            //Recorre el numero de pares Name-Value que tiene el documento
+            for (int j = 0; j < Documentos.get(i).getNumFields(); j++) {
+                ArrayList<String> pair = Documentos.get(i).getPair(j);
+                doc.addField(pair.get(0), pair.get(1));
+            }
+            //Tras añadir todos los pares del documento lo añade al cliente Solr
+            solr.add(doc);
+            doc.clear();
         }
-        
-        solr.add(doc);
+
         solr.commit();
     }
 }

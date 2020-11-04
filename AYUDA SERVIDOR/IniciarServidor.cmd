@@ -1,0 +1,1 @@
+..\bin\solr.cmd start

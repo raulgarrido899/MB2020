@@ -1,0 +1,1 @@
+Colocar carpeta entera dentro de la carpeta de Solr
