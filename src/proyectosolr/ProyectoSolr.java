@@ -1,5 +1,6 @@
 package proyectosolr;
 
+import TipoDatos.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
@@ -10,22 +11,25 @@ import java.util.ArrayList;
 import org.apache.solr.client.solrj.SolrServerException;
 
 public class ProyectoSolr {
-
-    private final String regexFichero = "glob:**LISA0.0*"; //Expresion regular para la primera parte de la practica // Solo lee 1 fichcero
-    private final String regexParseDocs = "(?<=Document\\s{1,4}[0-9]{1,4})\r\n|\r\n\r\n|\n\\*{44}\r\n";
-    //private String regexFichero = "glob:**LISA[0-5]*";
-    private ArrayList<String> FicheroToString;
+    
     private ClienteSolrj solrj;
-
-    //LEE FICHERO ---------------------------------------------------------------------------------------------
-    //Al crearse el objeto lee todos los ficheros que recoja la expresion regular de arriba
-    public ProyectoSolr(ClienteSolrj sol) throws IOException {
-        FicheroToString = new ArrayList<>();
-        solrj = sol;
-
+    
+    //Atributos para Documentos
+    private final String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
+    private final String regexParseDocs = "(?<=Document\\s{1,4}[0-9]{1,4})\r\n|\r\n\r\n|\n\\*{44}\r\n";
+    //private String regexDocFiles = "glob:**LISA[0-5]*";
+    private ArrayList<String> DocFilesToString;
+    
+    //Atributos para Queries
+    private ArrayList<String> QUEFilesToString;
+    private final String regexDocQUE = "glob:**LISA.QUE*";
+    private final String regexParseQUE = "(?<=^[0-9]{1,2})\r\n|#\r\n";
+    
+    //Convierte en String todo lo que lea del fichero separado por el regex
+    private void LeerFichero(ArrayList<String> ArrayString,String regex) throws IOException{
         //Rellena pathFichero con el path de cada fichero dado por la expresion regular "LISA[0-5]* "
         FileSystem fs = FileSystems.getDefault();
-        PathMatcher pm = fs.getPathMatcher(regexFichero);
+        PathMatcher pm = fs.getPathMatcher(regex);
 
         //Lee todos los ficheros de la carpeta Coleccion Lisa revisada
         //Si el fichero coincide con la expresion regular se pasa el contendio a String para parsearlo
@@ -33,31 +37,61 @@ public class ProyectoSolr {
         File[] arrayFicheros = directorio.listFiles();
         for (File FilePath : arrayFicheros) {
             if (pm.matches(FilePath.toPath())) {
-                FicheroToString.add(new String(Files.readAllBytes(FilePath.toPath())));
+                ArrayString.add(new String(Files.readAllBytes(FilePath.toPath())));
             }
         }
     }
-
-    /*
-    //METODO DE PRUEBA para comprobar los ficheros que lee
-    public void mostrarFicheroToString() {
-        System.out.println("Ficheros leidos: " + FicheroToString.size());
-        for (int i = 0; i < FicheroToString.size(); i++) {
-            System.out.println(FicheroToString.get(i));
-        }
+    
+    public ProyectoSolr(ClienteSolrj sol) throws IOException {
+        DocFilesToString = new ArrayList<>();
+        QUEFilesToString = new ArrayList<>();
+        solrj = sol;
+        
+        LeerFichero(DocFilesToString,regexDocFiles);
     }
-     */
-    //FIN LEE FICHERO ---------------------------------------------------------------------------------------------
-    //PARSEO FICHEROS ---------------------------------------------------------------------------------------------
+    
+    public void leerQueries() throws IOException{
+        LeerFichero(QUEFilesToString, regexDocQUE);
+    }
+    
+    public void parseQUE(){
+        String[] result;
+        //Lista donde se van guardando los Documentos
+        ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
+        
+        for (int i = 0; i < QUEFilesToString.size(); i++) {
+            result = QUEFilesToString.get(i).split(regexParseQUE);
+            
+            TipoQuery auxQUE;
+            //Recorre 35 queries -->
+            //result[0] -- Numero query
+            //result[1] -- Texto query
+            for (int j = 0; j < result.length - 1; j+=2) {
+                auxQUE = new TipoQuery(result[j],
+                                       result[j+1]);
+                
+                TodasQUE.add(auxQUE);
+            }
+        }
+        
+        //Realiza las consultas
+        System.out.println("Tamaño QUE parsed: "+TodasQUE.size());
+        for (int i = 0; i < TodasQUE.size(); i++) {
+            System.out.println("ID: " + TodasQUE.get(i).getId() +"\nQuery: "+ TodasQUE.get(i).getQuery());
+            System.out.println("------------------------------------------------");
+        }
+        
+    }
+    
     public void parseDocs() throws SolrServerException, IOException {
         String[] result;
         //Lista donde se van guardando los Documentos
         ArrayList<TipoDocumento> TodosDocs = new ArrayList<>();
 
         //Para cada fichero leido se parsea y se guarda en result
-        for (int i = 0; i < FicheroToString.size(); i++) {
+        for (int i = 0; i < DocFilesToString.size(); i++) {
             //Parsea 500 Documentos de 1 fichero
-            result = FicheroToString.get(i).split(regexParseDocs);
+            result = DocFilesToString.get(i).split(regexParseDocs);
 
             TipoDocumento auxDoc;
            
@@ -83,13 +117,16 @@ public class ProyectoSolr {
 
     }
 
-    //FIN PARSEO FICHEROS ---------------------------------------------------------------------------------------------
+    
+    
+    
     public static void main(String[] args) throws IOException, SolrServerException {
         ProyectoSolr pd = new ProyectoSolr(new ClienteSolrj());
 
-//        pd.mostrarFicheroToString();
-        pd.parseDocs();
-
+//        pd.parseDocs();
+            
+        pd.leerQueries();
+        pd.parseQUE();
     }
 
 }

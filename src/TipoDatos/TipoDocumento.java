@@ -1,5 +1,5 @@
 
-package proyectosolr;
+package TipoDatos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
