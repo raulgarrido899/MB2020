@@ -15,9 +15,9 @@ public class ProyectoSolr {
     private ClienteSolrj solrj;
     
     //Atributos para Documentos
-    private final String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
-    private final String regexParseDocs = "(?<=Document\\s{1,4}[0-9]{1,4})\r\n|\r\n\r\n|\n\\*{44}\r\n";
-    //private String regexDocFiles = "glob:**LISA[0-5]*";
+    //private final String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
+    private final String regexParseDocs = "(?<=Document\\s{1,4}[0-9]{1,4})\r\n|\r\n\r\n|\r\n\\s*\r\n|\n\\*{44}\r\n";
+    private String regexDocFiles = "glob:**LISA[0-5]*";
     private ArrayList<String> DocFilesToString;
     
     //Atributos para Queries
@@ -102,7 +102,6 @@ public class ProyectoSolr {
                 
                 String[] cadenaId = result[j].split("Document\\s{1,4}");
                 auxDoc.addPair("id", cadenaId[1]);
-                
                 auxDoc.addPair("title", result[j+1].replaceAll("\r\n|\r|\n"," "));
                 auxDoc.addPair("text", result[j+2].replaceAll("\r\n|\r|\n"," "));
 
@@ -123,8 +122,8 @@ public class ProyectoSolr {
 
         pd.parseDocs();
         Thread.sleep(300);
-        pd.leerQueries();
-        pd.parseQUE();
+    //    pd.leerQueries();
+    //    pd.parseQUE();
     }
 
 }
