@@ -23,7 +23,8 @@ public class ProyectoSolr {
     //Atributos para Queries
     private ArrayList<String> QUEFilesToString;
     private final String regexDocQUE = "glob:**LISA.QUE*";
-    private final String regexParseQUE = "(?<=^[0-9]{1,2})\r\n|#\r\n";
+    private final String regexParseQUE = "(?<=(?m)^[0-9]{1,2})\r\n|\\s#\r\n";
+    
     
     //Convierte en String todo lo que lea del fichero separado por el regex
     private void LeerFichero(ArrayList<String> ArrayString,String regex) throws IOException{
@@ -54,7 +55,7 @@ public class ProyectoSolr {
         LeerFichero(QUEFilesToString, regexDocQUE);
     }
     
-    public void parseQUE(){
+    public void parseQUE() throws SolrServerException, IOException{
         String[] result;
         //Lista donde se van guardando los Documentos
         ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
@@ -67,19 +68,16 @@ public class ProyectoSolr {
             //result[0] -- Numero query
             //result[1] -- Texto query
             for (int j = 0; j < result.length - 1; j+=2) {
-                auxQUE = new TipoQuery(result[j],
-                                       result[j+1]);
+                auxQUE = new TipoQuery(result[j].replaceAll("\r\n|\r|\n",""),
+                                       result[j+1].replaceAll("\r\n|\r|\n"," "));
                 
                 TodasQUE.add(auxQUE);
             }
         }
         
         //Realiza las consultas
-        System.out.println("Tamaño QUE parsed: "+TodasQUE.size());
-        for (int i = 0; i < TodasQUE.size(); i++) {
-            System.out.println("ID: " + TodasQUE.get(i).getId() +"\nQuery: "+ TodasQUE.get(i).getQuery());
-            System.out.println("------------------------------------------------");
-        }
+        solrj.Queries(TodasQUE);
+      
         
     }
     
@@ -120,11 +118,11 @@ public class ProyectoSolr {
     
     
     
-    public static void main(String[] args) throws IOException, SolrServerException {
+    public static void main(String[] args) throws IOException, SolrServerException, InterruptedException {
         ProyectoSolr pd = new ProyectoSolr(new ClienteSolrj());
 
-//        pd.parseDocs();
-            
+        pd.parseDocs();
+        Thread.sleep(300);
         pd.leerQueries();
         pd.parseQUE();
     }

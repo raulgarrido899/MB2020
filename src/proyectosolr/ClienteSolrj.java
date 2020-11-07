@@ -43,9 +43,15 @@ public class ClienteSolrj {
         //query.addFilterQuery("cat:electronics");
         //query.setFields("id","price","merchant","cat","store");
         for (int i = 0; i < consultas.size(); i++) {
-            System.out.println("QUERY: " + consultas.get(i).getId());
-            query.setQuery("query:" + consultas.get(i).getQuery());
             
+            String[] split = consultas.get(i).getQuery().split("\\s");
+            String CincoPalabras = "";
+            for (int j = 0; j < 5; j++) {
+                CincoPalabras += split[j] + " ";
+            }
+            query.setQuery("text:" + CincoPalabras);
+            System.out.println("QUERY: " + consultas.get(i).getId() + "--->" + CincoPalabras);
+
             QueryResponse rsp = solr.query(query);
     
             SolrDocumentList docs = rsp.getResults();
