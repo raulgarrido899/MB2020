@@ -27,7 +27,6 @@ public class ProyectoSolr {
     private final String regexParseQUE = "(?<=(?m)^[0-9]{1,2})\r\n|\\s#\r\n";
     private ArrayList<String> QUEFilesToString;
 
-
     //Atributos para NUM
     private final String regexNUMfiles = "glob:**LISARJ.NUM";
     private ArrayList<String> NUMFileToString;
@@ -58,9 +57,39 @@ public class ProyectoSolr {
         LeerFichero(DocFilesToString, regexDocFiles);
     }
 
+    public void parseDocs() throws SolrServerException, IOException {
+        String[] result;
+        //Lista donde se van guardando los Documentos
+        ArrayList<TipoDocumento> TodosDocs = new ArrayList<>();
+
+        //Para cada fichero leido se parsea y se guarda en result
+        for (int i = 0; i < DocFilesToString.size(); i++) {
+            //Parsea 500 Documentos de 1 fichero
+            result = DocFilesToString.get(i).split(regexParseDocs);
+
+            TipoDocumento auxDoc;
+            //Recorre 500 Documentos donde --->
+            //result[0] -- Numero Documento
+            //result[1] -- Titulo Documento
+            //result[2] -- Texto Documento
+            for (int j = 0; j < result.length - 1; j += 3) {
+                auxDoc = new TipoDocumento();
+
+                String[] cadenaId = result[j].split("Document\\s{1,4}");
+                auxDoc.addPair("id", cadenaId[1]);
+                auxDoc.addPair("title", result[j + 1].replaceAll("\r\n|\r|\n", " "));
+                auxDoc.addPair("text", result[j + 2].replaceAll("\r\n|\r|\n", " "));
+
+                TodosDocs.add(auxDoc);
+            }
+        }
+        //Indexa 500 Documentos de 1 fichero
+        solrj.AddDoc(TodosDocs); //Indexar documento a solr
+    }
+
     public void parseQUE() throws SolrServerException, IOException {
         LeerFichero(QUEFilesToString, regexQUEfiles);
-        
+
         String[] result;
         //Lista donde se van guardando los Documentos
         ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
@@ -79,45 +108,11 @@ public class ProyectoSolr {
                 TodasQUE.add(auxQUE);
             }
         }
-
         //Realiza las consultas
         solrj.Queries(TodasQUE);
-
     }
 
-    public void parseDocs() throws SolrServerException, IOException {
-        String[] result;
-        //Lista donde se van guardando los Documentos
-        ArrayList<TipoDocumento> TodosDocs = new ArrayList<>();
-
-        //Para cada fichero leido se parsea y se guarda en result
-        for (int i = 0; i < DocFilesToString.size(); i++) {
-            //Parsea 500 Documentos de 1 fichero
-            result = DocFilesToString.get(i).split(regexParseDocs);
-
-            TipoDocumento auxDoc;
-
-            //Recorre 500 Documentos donde --->
-            //result[0] -- Numero Documento
-            //result[1] -- Titulo Documento
-            //result[2] -- Texto Documento
-            for (int j = 0; j < result.length - 1; j += 3) {
-                auxDoc = new TipoDocumento();
-
-                String[] cadenaId = result[j].split("Document\\s{1,4}");
-                auxDoc.addPair("id", cadenaId[1]);
-                auxDoc.addPair("title", result[j + 1].replaceAll("\r\n|\r|\n", " "));
-                auxDoc.addPair("text", result[j + 2].replaceAll("\r\n|\r|\n", " "));
-
-                TodosDocs.add(auxDoc);
-            }
-
-        }
-        //Indexa 500 Documentos de 1 fichero
-        solrj.AddDoc(TodosDocs); //Indexar documento a solr
-
-    }
-
+    //FICHEROS-------------------------------------------------------------------------------
     //Crea fichero trec_rel_file
     public void parseNUM() throws IOException {
         LeerFichero(NUMFileToString, regexNUMfiles);
@@ -150,7 +145,7 @@ public class ProyectoSolr {
         //Añade la ultima cadena
         CadenaActual = CadenaActual.replaceAll("\r\n|\r|\n", "");
         result.add(CadenaActual);
-        
+
         //    Crea el fichero con el formato
         //    Consulta 0 documento relevante[0|1] 
         FileWriter trec = new FileWriter("trec_rel_file.txt");
@@ -183,13 +178,39 @@ public class ProyectoSolr {
         trec.close();
     }
 
+    //Crea QUE para trec_top_file
+    public void QUEsForTrec_top_file() throws SolrServerException, IOException {
+        LeerFichero(QUEFilesToString, regexQUEfiles);
+
+        String[] result;
+        //Lista donde se van guardando los Documentos
+        ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
+
+        for (int i = 0; i < QUEFilesToString.size(); i++) {
+            result = QUEFilesToString.get(i).split(regexParseQUE);
+
+            TipoQuery auxQUE;
+            //Recorre 35 queries -->
+            //result[0] -- Numero query
+            //result[1] -- Texto query
+            for (int j = 0; j < result.length - 1; j += 2) {
+                auxQUE = new TipoQuery(result[j].replaceAll("\r\n|\r|\n", ""),
+                        result[j + 1].replaceAll("\r\n|\r|\n", " "));
+
+                TodasQUE.add(auxQUE);
+            }
+        }
+        solrj.CreateTrec_top_file(TodasQUE);
+    }
+
     public static void main(String[] args) throws IOException, SolrServerException, InterruptedException {
         ProyectoSolr pd = new ProyectoSolr(new ClienteSolrj());
 
-   //     pd.parseDocs();
-   //     Thread.sleep(300);
-   //     pd.parseQUE();
-        pd.parseNUM();
-    }
+        //     pd.parseDocs();
+        //     Thread.sleep(300);
+        //     pd.parseQUE();
+        //    pd.parseNUM();
+        pd.QUEsForTrec_top_file();
 
+    }
 }
