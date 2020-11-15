@@ -38,6 +38,31 @@ public class ClienteSolrj {
         solr.commit();
     }
 
+    public void Queries(ArrayList<TipoQuery> consultas) throws SolrServerException, IOException {
+        SolrQuery query = new SolrQuery();
+
+        //query.addFilterQuery("cat:electronics");
+        //query.setFields("id","price","merchant","cat","store");
+        for (int i = 0; i < consultas.size(); i++) {
+
+            String[] split = consultas.get(i).getQuery().split("\\s");
+            String CincoPalabras = "";
+            for (int j = 0; j < 5; j++) {
+                CincoPalabras += split[j] + " ";
+            }
+            System.out.println("QUERY: " + consultas.get(i).getId() + "--->" + CincoPalabras);
+
+            query.setQuery("text:" + CincoPalabras);
+
+            QueryResponse rsp = solr.query(query);
+            SolrDocumentList docs = rsp.getResults();
+            for (int j = 0; j < docs.size(); ++j) {
+                System.out.println(docs.get(j));
+            }
+            System.out.println("-----------------------------------------------");
+        }
+    }
+
     public void CreateTrec_top_file(ArrayList<TipoQuery> consultas) throws SolrServerException, IOException {
         SolrQuery query = new SolrQuery();
         FileWriter trec = new FileWriter("trec_top_file.txt");
@@ -65,28 +90,4 @@ public class ClienteSolrj {
         trec.close();
     }
 
-    public void Queries(ArrayList<TipoQuery> consultas) throws SolrServerException, IOException {
-        SolrQuery query = new SolrQuery();
-
-        //query.addFilterQuery("cat:electronics");
-        //query.setFields("id","price","merchant","cat","store");
-        for (int i = 0; i < consultas.size(); i++) {
-
-            String[] split = consultas.get(i).getQuery().split("\\s");
-            String CincoPalabras = "";
-            for (int j = 0; j < 5; j++) {
-                CincoPalabras += split[j] + " ";
-            }
-            System.out.println("QUERY: " + consultas.get(i).getId() + "--->" + CincoPalabras);
-
-            query.setQuery("text:" + CincoPalabras);
-
-            QueryResponse rsp = solr.query(query);
-            SolrDocumentList docs = rsp.getResults();
-            for (int j = 0; j < docs.size(); ++j) {
-                System.out.println(docs.get(j));
-            }
-            System.out.println("-----------------------------------------------");
-        }
-    }
 }
