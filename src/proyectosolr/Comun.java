@@ -9,13 +9,16 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 import org.apache.solr.client.solrj.SolrServerException;
 
 public class Comun {
 
-    public static String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
-    //public static String regexDocFiles = "glob:**LISA[0-5]*";
+    //public static String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
+    public static String regexDocFiles = "glob:**LISA[0-5]*";
     public static String regexParseDocs = "(?<=<Organization>Document</Organization>\\s{1,4}[0-9]{1,4})\r\n|\r\n\r\n|\r\n\\s*\r\n|\n\\*{44}\r\n";
 
     public static String regexQUEfiles = "glob:**LISA.QUE*";
@@ -135,4 +138,41 @@ public class Comun {
         solrj.CreateTrec_top_file(TodasQUE);
     }
 
+    //Crea Fichero con las Stopwords
+    public static void StopWordsFile() throws IOException{
+        ArrayList<String> DocFileToString = new ArrayList<>();
+        ArrayList<String> TodasPalabras = new ArrayList<>();
+        
+        LeerFichero(DocFileToString, regexDocFiles);
+        //Lee los ficheros de Documentos y 
+        for (int i = 0; i < DocFileToString.size(); i++) {
+            StringTokenizer st = new StringTokenizer(DocFileToString.get(i));
+            while (st.hasMoreTokens()) {
+                TodasPalabras.add(st.nextToken());
+            }
+        }
+        
+        //Elimina Duplicados
+        Set<String> uniqueSet = new HashSet<>(TodasPalabras);
+        
+        //Crea una lista sin duplicados y los ordena por Frecuencia de aparicion
+        ArrayList<String> sortedList = new ArrayList<>(uniqueSet);
+        Collections.sort(sortedList,(o1, o2) -> {
+            return Collections.frequency(TodasPalabras, o2)-Collections.frequency(TodasPalabras, o1);
+        });
+        
+        FileWriter fw = new FileWriter("Stopwords.txt");
+        for (String s : sortedList) {  
+            int frecuencia = Collections.frequency(TodasPalabras, s);
+             if(frecuencia >= 300){
+               fw.write(s + " : " + frecuencia + "\n");
+                //System.out.println(s + ": " + frecuencia);  
+             }
+        }
+        fw.close();
+    }
+    
+    public static void main(String[] args) throws IOException {
+        StopWordsFile();
+    }
 }
