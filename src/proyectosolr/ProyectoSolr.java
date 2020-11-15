@@ -99,10 +99,10 @@ public class ProyectoSolr {
          */
     }
 
-    //WIP
-    public void parseQUE() throws SolrServerException, IOException {
-        LeerFichero(QUEFilesToString, regexQUEfiles);
-
+    public void parseQUE() throws SolrServerException, IOException, GateException {
+        AnnieGATE gate = new AnnieGATE();
+        QUEFilesToString = gate.funciona(regexQUEfiles);
+        
         String[] result;
         //Lista donde se van guardando los Documentos
         ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
@@ -115,9 +115,21 @@ public class ProyectoSolr {
             //result[0] -- Numero query
             //result[1] -- Texto query
             for (int j = 0; j < result.length - 1; j += 2) {
-                auxQUE = new TipoQuery(result[j].replaceAll("\r\n|\r|\n", ""),
-                        result[j + 1].replaceAll("\r\n|\r|\n", " "));
-
+                String id = result[j].replaceAll("\r\n|\r|\n", "");
+                id = id.replaceAll("<Date>|</Date>|"
+                        + "<Identifier>|</Identifier>|"
+                        + "<Location>|</Location>|"
+                        + "<Organization>|</Organization>|"
+                        + "<YearTemp>|</YearTemp>", "");
+                
+                String query = result[j + 1].replaceAll("\r\n|\r|\n", " ");
+                query = query.replaceAll("<Date>|</Date>|"
+                        + "<Identifier>|</Identifier>|"
+                        + "<Location>|</Location>|"
+                        + "<Organization>|</Organization>|"
+                        + "<YearTemp>|</YearTemp>", "");
+                
+                auxQUE = new TipoQuery(id,query);
                 TodasQUE.add(auxQUE);
             }
         }
@@ -128,9 +140,8 @@ public class ProyectoSolr {
     public static void main(String[] args) throws IOException, SolrServerException, InterruptedException, GateException {
         ProyectoSolr pd = new ProyectoSolr(new ClienteSolrj());
 
-        pd.parseDocs();
+        //pd.parseDocs();
         //     Thread.sleep(300);
-        //     pd.parseQUE();
-        //    pd.parseNUM();
+             pd.parseQUE();
     }
 }
