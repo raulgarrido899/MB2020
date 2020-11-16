@@ -139,11 +139,11 @@ public class Comun {
     }
 
     //Crea Fichero con las Stopwords
-    public static void StopWordsFile() throws IOException{
+    public static void StopWordsFile(String regex, int frequency, String filename) throws IOException{
         ArrayList<String> DocFileToString = new ArrayList<>();
         ArrayList<String> TodasPalabras = new ArrayList<>();
         
-        LeerFichero(DocFileToString, regexDocFiles);
+        LeerFichero(DocFileToString, regex);
         //Lee los ficheros de Documentos y 
         for (int i = 0; i < DocFileToString.size(); i++) {
             StringTokenizer st = new StringTokenizer(DocFileToString.get(i));
@@ -161,10 +161,10 @@ public class Comun {
             return Collections.frequency(TodasPalabras, o2)-Collections.frequency(TodasPalabras, o1);
         });
         
-        FileWriter fw = new FileWriter("Stopwords.txt");
+        FileWriter fw = new FileWriter(filename);
         for (String s : sortedList) {  
             int frecuencia = Collections.frequency(TodasPalabras, s);
-             if(frecuencia >= 300){
+             if(frecuencia >= frequency){
                fw.write(s + " : " + frecuencia + "\n");
                 //System.out.println(s + ": " + frecuencia);  
              }
@@ -173,6 +173,7 @@ public class Comun {
     }
     
     public static void main(String[] args) throws IOException {
-        StopWordsFile();
+        //StopWordsFile(regexDocFiles,350,"DOC_Stopwords.txt");
+        StopWordsFile(regexQUEfiles,3,"QUE_Stopwords.txt");
     }
 }
