@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static proyectosolr.Comun.*;
 
 public class AnnieGATE {
@@ -46,8 +44,10 @@ public class AnnieGATE {
         Corpus corpus = Factory.newCorpus("StandAloneAnnie corpus");
 
         ArrayList<String> DocsToString = new ArrayList<>();
+        
         LeerFichero(DocsToString, regex);
-
+        removeStopwords(DocsToString, regex);
+        
         for (int i = 0; i < DocsToString.size(); i++) {
             FeatureMap params = Factory.newFeatureMap();
             params.put("stringContent", DocsToString.get(i));
@@ -93,18 +93,5 @@ public class AnnieGATE {
         this.initAnnie();
         this.createCorpus(regex);
         return this.execute();
-    }
-
-    public static void main(String[] args) {
-        try {
-            AnnieGATE i2 = new AnnieGATE();
-
-            i2.funciona(regexDocFiles);
-
-        } catch (GateException ex) {
-            Logger.getLogger(AnnieGATE.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(AnnieGATE.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

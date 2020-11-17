@@ -59,10 +59,10 @@ public class ProyectoSolr {
             for (int j = 0; j < result.length - 1; j += 3) {
                 auxDoc = new TipoDocumento();
 
-                String[] cadenaId = result[j].split("<Organization>Document</Organization>\\s{1,4}");
-                auxDoc.addPair("id", cadenaId[1]);
+                String cadenaId = result[j].replaceAll("\\s{2,}","");
+                auxDoc.addPair("id", cadenaId);
 
-                String title = result[j + 1].replaceAll("\r\n|\r|\n", " ");
+                String title = result[j + 1].replaceAll("\r\n|\r|\n|\\s{2,}", " ");
                 title = title.replaceAll("<Date>|</Date>|"
                         + "<Identifier>|</Identifier>|"
                         + "<Location>|</Location>|"
@@ -71,7 +71,7 @@ public class ProyectoSolr {
 
                 auxDoc.addPair("title", title);
 
-                String text = result[j + 2].replaceAll("\r\n|\r|\n", " ");
+                String text = result[j + 2].replaceAll("\r\n|\r|\n|\\s{2,}", " ");
                 text = text.replaceAll("<Date>|</Date>|"
                         + "<Identifier>|</Identifier>|"
                         + "<Location>|</Location>|"
@@ -140,8 +140,10 @@ public class ProyectoSolr {
     public static void main(String[] args) throws IOException, SolrServerException, InterruptedException, GateException {
         ProyectoSolr pd = new ProyectoSolr(new ClienteSolrj());
 
-        //pd.parseDocs();
+       // pd.prueba();
+        
+        pd.parseDocs();
         //     Thread.sleep(300);
-             pd.parseQUE();
+         //    pd.parseQUE();
     }
 }
