@@ -120,45 +120,33 @@ public class ProyectoSolr {
 
         String NUM = NUMFileToString.get(0);
         NUM = NUM.replaceAll("(?m)^\\s*", ""); //QUITA ESPACIOS INICIALES
-        String[] split = NUM.split("\r\n");
 
-        /*
-            Si la linea empieza por el numero del documento que se busca 
-            guarda la cadena ya finalizada, crea una nueva y añade 1 al documento a buscar
-            
-            Si la linea NO empieza por el numero del documento añade esa linea a la cadena actual
-         */
-        //Añade la primera cadena
-        String CadenaActual = split[0];
-        int NumeroActual = 2;
-        for (int i = 1; i < split.length; i++) {
-            if (split[i].startsWith(String.valueOf(NumeroActual) + " ")) {
-                CadenaActual = CadenaActual.replaceAll("\r\n|\r|\n", "");
-                result.add(CadenaActual);
-                CadenaActual = "";
-                NumeroActual++;
-                CadenaActual += split[i];
-            } else {
-                CadenaActual += split[i];
+        StringTokenizer st1 = new StringTokenizer(NUM);
+        String aux = "";
+        
+        while(st1.hasMoreTokens()){
+            aux+=st1.nextToken()+" "; // Lee numero Query
+            int numDoc = Integer.parseInt(st1.nextToken()); // lee numero Documentos
+            for (int i = 0; i < numDoc; i++) {
+                aux+=st1.nextToken()+" "; // Lee tantos Documentos como numeroDocumentos
             }
+            result.add(aux);
+            aux="";
         }
-        //Añade la ultima cadena
-        CadenaActual = CadenaActual.replaceAll("\r\n|\r|\n", "");
-        result.add(CadenaActual);
-
+        
         //    Crea el fichero con el formato
         //    Consulta 0 documento relevante[0|1] 
         FileWriter trec = new FileWriter("trec_rel_file.txt");
         for (int i = 0; i < result.size(); i++) {
             //Tokeniza String con Formato Consulta Documento1 Documento2 DocumentoN
-            StringTokenizer st = new StringTokenizer(result.get(i));
+            StringTokenizer st2 = new StringTokenizer(result.get(i));
 
             //Primer Token es la String con el id de la Consulta
-            String Consulta = st.nextToken();
+            String Consulta = st2.nextToken();
             //Los demas token son los id de los documentos relacionados ordenados
             ArrayList<String> DocRelacionados = new ArrayList<>();
-            while (st.hasMoreTokens()) {
-                DocRelacionados.add(st.nextToken());
+            while (st2.hasMoreTokens()) {
+                DocRelacionados.add(st2.nextToken());
             }
 
             //6004 numero de documentos totales
@@ -209,8 +197,8 @@ public class ProyectoSolr {
         //     pd.parseDocs();
         //     Thread.sleep(300);
         //     pd.parseQUE();
-        //    pd.parseNUM();
-        pd.QUEsForTrec_top_file();
+            pd.parseNUM();
+        //pd.QUEsForTrec_top_file();
 
     }
 }

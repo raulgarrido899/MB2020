@@ -4,6 +4,7 @@ import TipoDatos.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -52,13 +53,13 @@ public class ClienteSolrj {
             System.out.println("QUERY: " + consultas.get(i).getId() + "--->" + CincoPalabras);
 
             query.setQuery("text:" + CincoPalabras);
-            query.setFields("f1:id,score");
+            query.setFields("id,score");
 
             QueryResponse rsp = solr.query(query);
             SolrDocumentList docs = rsp.getResults();
             for (int j = 0; j < docs.size(); j++) {
-                System.out.println((i + 1) + " Q0 " + (j + 1) + " " + docs.get(j).get("score") + " RaulG");
-                trec.write((i + 1) + " Q0 " + (j + 1) + " " + docs.get(j).get("score") + " RaulG\n");
+                System.out.println((i + 1) + " Q0 "+ docs.get(j).get("id")+ " " + j + " " + docs.get(j).get("score") + " RaulG");
+                trec.write((i + 1) + " Q0 " + docs.get(j).get("id") + " " + j + " " + docs.get(j).get("score") + " RaulG\n");
             }
             System.out.println("-----------------------------------------------");
         }
