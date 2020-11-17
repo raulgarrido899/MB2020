@@ -74,11 +74,9 @@ public class AnnieGATE {
             Document doc = (Document) iter.next();
             AnnotationSet defaultAnnotSet = doc.getAnnotations();
             Set annotTypesRequired = new HashSet();
-            annotTypesRequired.add("Date");
             annotTypesRequired.add("Identifier");
             annotTypesRequired.add("Location");
             annotTypesRequired.add("Organization");
-            annotTypesRequired.add("YearTemp");
             Set<Annotation> peopleAndPlaces
                     = new HashSet<Annotation>(defaultAnnotSet.get(annotTypesRequired));
 

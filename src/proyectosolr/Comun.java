@@ -19,8 +19,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 
 public class Comun {
     
-    public static final String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
-    //public static final String regexDocFiles = "glob:**LISA[0-5]*";
+    //public static final String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
+    public static final String regexDocFiles = "glob:**LISA[0-5]*";
     public static final String regexParseDocs = "(?<=(?m)^\\s{1,4}[0-9]{1,4})\r\n|"
             + "\r\n\r\n|"
             + "\r\n\\s*\r\n|"
@@ -90,7 +90,6 @@ public class Comun {
                 break;
             }
         }
-        
         if (notNull) {
             for (int i = 0; i < ArrayString.size(); i++) {
                 for (int j = 0; j < Stopwords.size(); j++) {
@@ -100,8 +99,6 @@ public class Comun {
                 }
             }
         }
-        
-     
     }
 
     //FICHEROS-------------------------------------------------------------------------------
