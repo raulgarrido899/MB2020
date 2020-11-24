@@ -44,10 +44,10 @@ public class AnnieGATE {
         Corpus corpus = Factory.newCorpus("StandAloneAnnie corpus");
 
         ArrayList<String> DocsToString = new ArrayList<>();
-        
+
         LeerFichero(DocsToString, regex);
         removeStopwords(DocsToString, regex);
-        
+
         for (int i = 0; i < DocsToString.size(); i++) {
             FeatureMap params = Factory.newFeatureMap();
             params.put("stringContent", DocsToString.get(i));

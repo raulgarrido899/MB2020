@@ -18,42 +18,36 @@ import java.util.StringTokenizer;
 import org.apache.solr.client.solrj.SolrServerException;
 
 public class Comun {
-    
+
     //public static final String regexDocFiles = "glob:**LISA0.0*";// Solo lee 1 fichcero
     public static final String regexDocFiles = "glob:**LISA[0-5]*";
     public static final String regexParseDocs = "(?<=(?m)^\\s{1,4}[0-9]{1,4})\r\n|"
             + "\r\n\r\n|"
             + "\r\n\\s*\r\n|"
             + "\n\\*{44}\r\n";
-    
+
     public static final String regexQUEfiles = "glob:**LISA.QUE*";
     public static final String regexParseQUE = "(?<=(?m)^[0-9]{1,2})\r\n|"
             + "\\s#\r\n";
-    
+
     public static final String regexNUMfiles = "glob:**LISARJ.NUM";
-    
-    public static final ArrayList<String> DOCStopwords = new ArrayList<>(Arrays.asList(
-            "THE", "OF", "AND", "IN", "TO", "A", "FOR", "Document", "INFORMATION", "IS", "ON", "ARE", "BY", "WITH", "AS",
-            "BE", "AN", "AT", "THAT", "FROM", "WHICH", "PUBLIC", "WAS", "THEIR", "USE", "NEW",
-            "HAS", "THIS", "IT", "ITS", "HAVE", "NOT", "DESCRIBES",
-            "SOME", "OR", "WERE", "REPORT", "OTHER", "DISCUSSES", "BEEN", "SYSTEMS", "CAN", "WILL", "ALL",
-            "WORK", "STUDY", "THESE", "SHOULD", "MORE", "SUCH", "ALSO", "REFERENCE",
-            "BETWEEN", "STATE", "SCHOOL", "BUT", "SPECIAL", "BOOKS", "USED",
-            "SUBJECT", "INTO", "THEY", "STAFF", "COLLECTION", "ABOUT", "PRESENTED", "GENERAL",
-            "ROLE", "GIVEN", "USER", "FUTURE", "MOST", "RETRIEVAL", "NEED", "HOW", "THERE", "MUST", "RESULTS",
-            "EACH", "THROUGH", "MADE", "PROVIDE", "NUMBER", "CURRENT", "SURVEY",
-            "BASED", "US", "PART", "CENTRAL", "OUT", "WITHIN", "SOCIAL", "THAN", "ACTIVITIES", "ACCESS", "USING",
-            "MAY", "VARIOUS", "MANY", "NEEDS", "PUBLISHED", "BOTH", "ONLY"));
-    
-    public static final ArrayList<String> QUEStopwords = new ArrayList<>(Arrays.asList(
-            "OF", "IN", "THE", "AND", "I", "INFORMATION", "INTERESTED", "AM", "ON", "TO", "BE", "WOULD", "FOR",
-            "OR", "ANY", "LIBRARY", "A", "LIBRARIES,", "IS", "AT", "RECEIVE", "DISSERTATION", "LIBRARIES",
-            "COMPUTER", "WITH", "MY", "LOOKING", "ONLINE", "SYSTEMS,", "THIS", "ESPECIALLY", "RETRIEVAL", "ARE",
-            "MANAGEMENT", "PLEASED", "INCLUDE", "SYSTEMS.", "ACADEMIC", "CONSUMER", "BOTH", "ALSO", "WHICH", "SEARCH", "AS",
-            "USE", "STUDIES", "DEVELOPED", "PROFESSIONAL", "AREA", "THEIR", "USING",
-            "ETC.", "SUCH", "USE,", "I.E.", "RETRIEVAL,", "CHARGING", "WILL", "AN", "BASED", "BY", "MAY", "DATABASES,",
-            "LESS", "ASSISTED", "GROUPS,", "BUT", "WHAT", "DOCUMENT", "E.G.", "LIBRARY,", "MORE", "CURRENT", "THAT", "DO", "VARIOUS",
-            "INCLUDING", "ALMOST", "CONFLATION", "ALL", "NOT"));
+
+    public static final ArrayList<String> STOPWORDS = new ArrayList<>(Arrays.asList(
+            "SCHOOL", "BETWEEN", "Document", "SHOULD", "THEY", "STUDY", "ALMOST", "WHICH", "NEEDS", "PLEASED",
+            "DOCUMENT", "ETC.", "INCLUDE", "EACH", "VARIOUS", "IN", "SEARCH", "CENTRAL", "LIBRARY", "IS",
+            "IT", "SURVEY", "AM", "AN", "MUST", "RETRIEVAL", "OUT", "ACADEMIC", "E.G.", "HOW",
+            "AS", "AT", "BEEN", "LIBRARY,", "ARE", "MADE", "CONSUMER", "PUBLIC", "SYSTEMS", "WORK",
+            "A", "INTO", "BE", "MAY", "HAVE", "I", "BOOKS", "CHARGING", "THE", "ROLE",
+            "BASED", "BY", "GIVEN", "ASSISTED", "WOULD", "PRESENTED", "DISCUSSES", "SUCH", "BUT", "PROFESSIONAL",
+            "DATABASES,", "USE", "LOOKING", "ONLINE", "I.E.", "OTHER", "MORE", "SOCIAL", "STAFF", "SUBJECT",
+            "TO", "HAS", "DISSERTATION", "MANY", "LIBRARIES,", "CONFLATION", "THAT", "NEW", "ALL", "COLLECTION",
+            "USE,", "THERE", "THAN", "ITS", "ONLY", "FROM", "FUTURE", "DO", "SPECIAL", "RECEIVE",
+            "GROUPS,", "PUBLISHED", "AREA", "DESCRIBES", "USED", "INCLUDING", "US", "BOTH", "ESPECIALLY", "THESE",
+            "NUMBER", "INFORMATION", "MOST", "FOR", "WERE", "MY", "CURRENT", "USING", "CAN", "NOT",
+            "NEED", "THROUGH", "AND", "RETRIEVAL,", "THIS", "LESS", "SYSTEMS.", "SYSTEMS,", "WAS", "STATE",
+            "WITHIN", "GENERAL", "ANY", "STUDIES", "SOME", "DEVELOPED", "INTERESTED", "PART", "OF", "REFERENCE",
+            "ALSO", "ABOUT", "ACCESS", "ON", "RESULTS", "PROVIDE", "OR", "MANAGEMENT", "ACTIVITIES", "REPORT",
+            "USER", "WHAT", "WITH", "LIBRARIES", "COMPUTER", "WILL", "THEIR"));
 
     //Convierte en String todo lo que lea del fichero separado por el regex
     public static void LeerFichero(ArrayList<String> ArrayString, String regex) throws IOException {
@@ -71,32 +65,15 @@ public class Comun {
             }
         }
     }
-    
+
     public static void removeStopwords(ArrayList<String> ArrayString, String regex) throws FileNotFoundException, IOException {
-        boolean notNull = false;
-        ArrayList<String> Stopwords = new ArrayList<>();
-        switch (regex) {
-            case regexDocFiles: {
-                Stopwords = DOCStopwords;
-                notNull = true;
-                break;
-            }
-            case regexQUEfiles: {
-                Stopwords = QUEStopwords;
-                notNull = true;
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        if (notNull) {
-            for (int i = 0; i < ArrayString.size(); i++) {
-                for (int j = 0; j < Stopwords.size(); j++) {
-                    String regexStop="\\b"+Stopwords.get(j)+"\\b";
-                    String reemplazo = ArrayString.get(i).replaceAll(regexStop, "");
-                    ArrayString.set(i, reemplazo);
-                }
+        ArrayList<String> Stopwords = STOPWORDS;
+
+        for (int i = 0; i < ArrayString.size(); i++) {
+            for (int j = 0; j < Stopwords.size(); j++) {
+                String regexStop = "\\b" + Stopwords.get(j) + "\\b";
+                String reemplazo = ArrayString.get(i).replaceAll(regexStop, "");
+                ArrayString.set(i, reemplazo);
             }
         }
     }
@@ -106,36 +83,25 @@ public class Comun {
     public static void parseNUM() throws IOException {
         ArrayList<String> NUMFileToString = new ArrayList<>();
         ArrayList<String> result = new ArrayList<>();
-        
+
         LeerFichero(NUMFileToString, regexNUMfiles);
-        
+
         String NUM = NUMFileToString.get(0);
         NUM = NUM.replaceAll("(?m)^\\s*", ""); //QUITA ESPACIOS INICIALES
         String[] split = NUM.split("\r\n");
 
-        /*
-            Si la linea empieza por el numero del documento que se busca 
-            guarda la cadena ya finalizada, crea una nueva y añade 1 al documento a buscar
-            
-            Si la linea NO empieza por el numero del documento añade esa linea a la cadena actual
-         */
-        //Añade la primera cadena
-        String CadenaActual = split[0];
-        int NumeroActual = 2;
-        for (int i = 1; i < split.length; i++) {
-            if (split[i].startsWith(String.valueOf(NumeroActual) + " ")) {
-                CadenaActual = CadenaActual.replaceAll("\r\n|\r|\n", "");
-                result.add(CadenaActual);
-                CadenaActual = "";
-                NumeroActual++;
-                CadenaActual += split[i];
-            } else {
-                CadenaActual += split[i];
+        StringTokenizer st1 = new StringTokenizer(NUM);
+        String aux = "";
+
+        while (st1.hasMoreTokens()) {
+            aux += st1.nextToken() + " "; // Lee numero Query
+            int numDoc = Integer.parseInt(st1.nextToken()); // lee numero Documentos
+            for (int i = 0; i < numDoc; i++) {
+                aux += st1.nextToken() + " "; // Lee tantos Documentos como numeroDocumentos
             }
+            result.add(aux);
+            aux = "";
         }
-        //Añade la ultima cadena
-        CadenaActual = CadenaActual.replaceAll("\r\n|\r|\n", "");
-        result.add(CadenaActual);
 
         //    Crea el fichero con el formato
         //    Consulta 0 documento relevante[0|1] 
@@ -173,14 +139,14 @@ public class Comun {
     public static void QUEsForTrec_top_file() throws SolrServerException, IOException {
         ArrayList<String> QUEFilesToString = new ArrayList<>();
         LeerFichero(QUEFilesToString, regexQUEfiles);
-        
+
         String[] result;
         //Lista donde se van guardando los Documentos
         ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
-        
+
         for (int i = 0; i < QUEFilesToString.size(); i++) {
             result = QUEFilesToString.get(i).split(regexParseQUE);
-            
+
             TipoQuery auxQUE;
             //Recorre 35 queries -->
             //result[0] -- Numero query
@@ -188,7 +154,7 @@ public class Comun {
             for (int j = 0; j < result.length - 1; j += 2) {
                 auxQUE = new TipoQuery(result[j].replaceAll("\r\n|\r|\n", ""),
                         result[j + 1].replaceAll("\r\n|\r|\n", " "));
-                
+
                 TodasQUE.add(auxQUE);
             }
         }
@@ -200,7 +166,7 @@ public class Comun {
     public static void StopWordsFile(String regex, int minFrequency, String filename) throws IOException {
         ArrayList<String> DocFileToString = new ArrayList<>();
         ArrayList<String> TodasPalabras = new ArrayList<>();
-        
+
         LeerFichero(DocFileToString, regex);
         //Lee los ficheros de Documentos y 
         for (int i = 0; i < DocFileToString.size(); i++) {
@@ -218,7 +184,7 @@ public class Comun {
         Collections.sort(sortedList, (o1, o2) -> {
             return Collections.frequency(TodasPalabras, o2) - Collections.frequency(TodasPalabras, o1);
         });
-        
+
         FileWriter fw = new FileWriter(filename);
         for (String s : sortedList) {
             int frecuencia = Collections.frequency(TodasPalabras, s);
@@ -229,9 +195,11 @@ public class Comun {
         }
         fw.close();
     }
-    
-    public static void main(String[] args) throws IOException {
+
+    public static void main(String[] args) throws IOException, SolrServerException {
         //StopWordsFile(regexDocFiles,350,"DOC_Stopwords.txt");
         //StopWordsFile(regexQUEfiles,3,"QUE_Stopwords.txt");
+//        QUEsForTrec_top_file();
+        //parseNUM();
     }
 }
