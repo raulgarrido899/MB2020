@@ -17,15 +17,13 @@ public class ProyectoSolr {
     private ArrayList<String> DocFilesToString;
     private ArrayList<String> QUEFilesToString;
 
-    private String replaceBasico = "\r\n|\r|\n|\\s{2,}|&apos;|&amp;";
-    
-     private String replaceEtiquetas = "<Identifier>|</Identifier>|"
+    private final String replaceBasico = "\r\n|\r|\n|\\s{2,}|&apos;|&amp;";
+
+    private final String replaceEtiquetas = "<Identifier>|</Identifier>|"
             + "<Location>|</Location>|"
             + "<Organization>|</Organization>|";
-    
-    private String replacePuntuacion = "\\,|\\.|\\-|\\:|\\;";
-    
-    
+
+    private final String replacePuntuacion = "\\,|\\.|\\-|\\:|\\;";
 
     public ProyectoSolr(ClienteSolrj sol) throws IOException {
         DocFilesToString = new ArrayList<>();
@@ -33,7 +31,56 @@ public class ProyectoSolr {
         solrj = sol;
     }
 
-    public void parseDocs() throws SolrServerException, IOException, GateException {
+    /**
+     *
+     * @param text Texto del cual obtener los valores de las etiquetas
+     * @return TipoDocumento con todas las etiquetas y sus valores
+     */
+    private TipoDocumento getEtiquetas(String text) {
+        TipoDocumento auxDoc = new TipoDocumento();
+
+        Set<String> ORG = new HashSet<>();
+        Set<String> LOC = new HashSet<>();
+
+        StringTokenizer textTokenizer = new StringTokenizer(text);
+        while (textTokenizer.hasMoreTokens()) {
+            String next = textTokenizer.nextToken();
+
+            //Toda la etiqueta en una linea
+            if (next.startsWith("<Organization>") && next.endsWith("</Organization>")) {
+                ORG.add(next.replaceAll("<Organization>|</Organization>|" + replacePuntuacion, ""));
+            } //Etiqueta en varias lineas
+            else if (next.startsWith("<Organization>")) {
+                String aux = next;
+                while (!next.contains("</Organization>")) {
+                    next = textTokenizer.nextToken();
+                    aux += " " + next;
+                }
+                ORG.add(aux.replaceAll("<Organization>|</Organization>|" + replacePuntuacion, ""));
+            }
+
+            //Toda la etiqueta en una linea
+            if (next.startsWith("<Location>") && next.endsWith("</Location>")) {
+                LOC.add(next.replaceAll("<Location>|</Location>|" + replacePuntuacion, ""));
+            } //Etiqueta en varias lineas
+            else if (next.startsWith("<Location>")) {
+                String aux = next;
+                while (!next.contains("</Location>")) {
+                    next = textTokenizer.nextToken();
+                    aux += " " + next;
+                }
+                LOC.add(aux.replaceAll("<Location>|</Location>|" + replacePuntuacion, ""));
+            }
+        }
+        if(!ORG.isEmpty())
+            auxDoc.addPair("Organization", ORG.toString().replaceAll("\\[|\\]", ""));
+        if(!LOC.isEmpty())
+            auxDoc.addPair("Location", LOC.toString().replaceAll("\\[|\\]", ""));
+
+        return auxDoc;
+    }
+
+    private ArrayList<TipoDocumento> parseDocs() throws IOException, GateException {
         AnnieGATE gate = new AnnieGATE();
         DocFilesToString = gate.funciona(regexDocFiles);
 
@@ -61,94 +108,79 @@ public class ProyectoSolr {
                 title = title.replaceAll(replaceEtiquetas, "");
                 auxDoc.addPair("title", title);
 
-                String auxToken;
-                String text = auxToken = result[j + 2].replaceAll(replaceBasico, " ");
+                String auxEtiquetas;
+                String text = auxEtiquetas = result[j + 2].replaceAll(replaceBasico, " ");
                 text = text.replaceAll(replaceEtiquetas, "");
                 auxDoc.addPair("text", text);
 
-                Set<String> ORG = new HashSet<>();
-                Set<String> LOC = new HashSet<>();
-
-                StringTokenizer textTokenizer = new StringTokenizer(auxToken);
-                while (textTokenizer.hasMoreTokens()) {
-                    String next = textTokenizer.nextToken();
-
-                    //Toda la etiqueta en una linea
-                    if (next.startsWith("<Organization>") && next.endsWith("</Organization>")) {
-                        ORG.add(next.replaceAll("<Organization>|</Organization>|" + replacePuntuacion, ""));
-                    } //Etiqueta en varias lineas
-                    else if (next.startsWith("<Organization>")) {
-                        String aux = next;
-                        while (!next.contains("</Organization>")) {
-                            next = textTokenizer.nextToken();
-                            aux += " " + next;
-                        }
-                        ORG.add(aux.replaceAll("<Organization>|</Organization>|" + replacePuntuacion, ""));
-                    }
-
-                    //Toda la etiqueta en una linea
-                    if (next.startsWith("<Location>") && next.endsWith("</Location>")) {
-                        LOC.add(next.replaceAll("<Location>|</Location>|" + replacePuntuacion, ""));
-                    } //Etiqueta en varias lineas
-                    else if (next.startsWith("<Location>")) {
-                        String aux = next;
-                        while (!next.contains("</Location>")) {
-                            next = textTokenizer.nextToken();
-                            aux += " " + next;
-                        }
-                        LOC.add(aux.replaceAll("<Location>|</Location>|" + replacePuntuacion, ""));
-                    }
-                }
-                auxDoc.addPair("Organization", ORG.toString().replaceAll("\\[|\\]", ""));
-                auxDoc.addPair("Location", LOC.toString().replaceAll("\\[|\\]", ""));
-
-                System.out.println(cadenaId + "\n" + title + "\n" + text + "\n"
-                        + "Organizations: " + ORG.toString().replaceAll("\\[|\\]", "") + "\n"
-                        + "Location: " + LOC.toString().replaceAll("\\[|\\]", "") + "\n");
+                //Añade los pares de las etiquetas Location y Organization
+                auxDoc.addAllPairs(getEtiquetas(auxEtiquetas));
 
                 TodosDocs.add(auxDoc);
             }
-
         }
-        solrj.AddDoc(TodosDocs); //Indexar documento a solr
+        return TodosDocs;
     }
 
-    public void parseQUE() throws SolrServerException, IOException, GateException {
+    private ArrayList<TipoDocumento> parseQUE() throws IOException, GateException {
         AnnieGATE gate = new AnnieGATE();
         QUEFilesToString = gate.funciona(regexQUEfiles);
 
         String[] result;
         //Lista donde se van guardando los Documentos
-        ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
+        ArrayList<TipoDocumento> TodasQUE = new ArrayList<>();
 
         for (int i = 0; i < QUEFilesToString.size(); i++) {
             result = QUEFilesToString.get(i).split(regexParseQUE);
 
-            TipoQuery auxQUE;
+            TipoDocumento auxQUE;
             //Recorre 35 queries -->
             //result[0] -- Numero query
             //result[1] -- Texto query
             for (int j = 0; j < result.length - 1; j += 2) {
-                String id = result[j].replaceAll("\r\n|\r|\n", "");
+                String id = result[j].replaceAll(replaceBasico, "");
                 id = id.replaceAll(replaceEtiquetas, "");
 
-                String query = result[j + 1].replaceAll("\r\n|\r|\n", " ");
+                String auxEtiquetas;
+                String query = auxEtiquetas = result[j + 1].replaceAll(replaceBasico, " ");
                 query = query.replaceAll(replaceEtiquetas, "");
 
-                auxQUE = new TipoQuery(id, query);
+                auxQUE = new TipoDocumento();
+                auxQUE.addPair("id", id);
+                auxQUE.addPair("text", query);
+
+                //Añade los pares de las etiquetas Location y Organization
+                auxQUE.addAllPairs(getEtiquetas(auxEtiquetas));
+                
+                    
+                for (int zzz = 0; zzz < auxQUE.getNumPairs(); zzz++) {
+                    System.out.print(auxQUE.getPair(zzz).get(0) + ": " + auxQUE.getPair(zzz).get(1) + "\n");
+                }
+                System.out.println("\n");
                 TodasQUE.add(auxQUE);
             }
         }
+        return TodasQUE;
+    }
+
+    public void IndexaDocs() throws IOException, GateException, SolrServerException {
+        solrj.AddDoc(parseDocs()); //Indexar documento a solr
+    }
+
+    public void solrQUE() throws IOException, GateException, SolrServerException {
         //Realiza las consultas
-        solrj.Queries(TodasQUE);
+        solrj.Queries(parseQUE());
+    }
+
+    //Crea fichero trec_top_file.txt
+    public void TopFile() throws IOException, GateException, SolrServerException {
+        solrj.CreateTrec_top_file(parseQUE());
     }
 
     public static void main(String[] args) throws IOException, SolrServerException, InterruptedException, GateException {
         ProyectoSolr pd = new ProyectoSolr(new ClienteSolrj());
-
-        //pd.prueba();
-        pd.parseDocs();
-        //     Thread.sleep(300);
-        //    pd.parseQUE();
+        
+        //pd.solrQUE();
+        //pd.TopFile();
     }
 }

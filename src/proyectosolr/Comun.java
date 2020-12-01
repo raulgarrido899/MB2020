@@ -1,6 +1,5 @@
 package proyectosolr;
 
-import TipoDatos.TipoQuery;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -135,33 +134,6 @@ public class Comun {
         trec.close();
     }
 
-    //Crea QUE para trec_top_file
-    public static void QUEsForTrec_top_file() throws SolrServerException, IOException {
-        ArrayList<String> QUEFilesToString = new ArrayList<>();
-        LeerFichero(QUEFilesToString, regexQUEfiles);
-
-        String[] result;
-        //Lista donde se van guardando los Documentos
-        ArrayList<TipoQuery> TodasQUE = new ArrayList<>();
-
-        for (int i = 0; i < QUEFilesToString.size(); i++) {
-            result = QUEFilesToString.get(i).split(regexParseQUE);
-
-            TipoQuery auxQUE;
-            //Recorre 35 queries -->
-            //result[0] -- Numero query
-            //result[1] -- Texto query
-            for (int j = 0; j < result.length - 1; j += 2) {
-                auxQUE = new TipoQuery(result[j].replaceAll("\r\n|\r|\n", ""),
-                        result[j + 1].replaceAll("\r\n|\r|\n", " "));
-
-                TodasQUE.add(auxQUE);
-            }
-        }
-        ClienteSolrj solrj = new ClienteSolrj();
-        solrj.CreateTrec_top_file(TodasQUE);
-    }
-
     //Crea Fichero con las Stopwords
     public static void StopWordsFile(String regex, int minFrequency, String filename) throws IOException {
         ArrayList<String> DocFileToString = new ArrayList<>();
@@ -199,7 +171,6 @@ public class Comun {
     public static void main(String[] args) throws IOException, SolrServerException {
         //StopWordsFile(regexDocFiles,350,"DOC_Stopwords.txt");
         //StopWordsFile(regexQUEfiles,3,"QUE_Stopwords.txt");
-//        QUEsForTrec_top_file();
         //parseNUM();
     }
 }

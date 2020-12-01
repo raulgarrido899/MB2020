@@ -26,7 +26,7 @@ public class ClienteSolrj {
         //Para todos los documentos
         for (int i = 0; i < Documentos.size(); i++) {
             //Recorre el numero de pares Name-Value que tiene el documento
-            for (int j = 0; j < Documentos.get(i).getNumFields(); j++) {
+            for (int j = 0; j < Documentos.get(i).getNumPairs(); j++) {
                 ArrayList<String> pair = Documentos.get(i).getPair(j);
                 doc.addField(pair.get(0), pair.get(1));
             }
@@ -38,24 +38,29 @@ public class ClienteSolrj {
         solr.commit();
     }
 
-    public void Queries(ArrayList<TipoQuery> consultas) throws SolrServerException, IOException {
+    public void Queries(ArrayList<TipoDocumento> consultas) throws SolrServerException, IOException {
         SolrQuery query = new SolrQuery();
 
-        //query.addFilterQuery("cat:electronics");
-        //query.setFields("id","price","merchant","cat","store");
+        //35 Consultas
         for (int i = 0; i < consultas.size(); i++) {
 
-            String[] split = consultas.get(i).getQuery().split("\\s");
-            String CincoPalabras = "";
-            for (int j = 0; j < 5; j++) {
-                CincoPalabras += split[j] + " ";
+            /*
+            Por cada par:
+                0 -> id
+                2 -> text
+                3 -> Organization
+                4 -> Location
+             */
+            for (int j = 1; j < consultas.get(i).getNumPairs(); j++) {
+                String Name, Value;
+                Name = consultas.get(i).getPair(j).get(0);
+                Value = consultas.get(i).getPair(j).get(1);
+                query.setQuery(Name + ":" + Value);
             }
-            System.out.println("QUERY: " + consultas.get(i).getId() + "--->" + CincoPalabras);
-
-            query.setQuery("text:" + CincoPalabras);
 
             QueryResponse rsp = solr.query(query);
             SolrDocumentList docs = rsp.getResults();
+            System.out.println("QUE: " + (i+1));
             for (int j = 0; j < docs.size(); ++j) {
                 System.out.println(docs.get(j));
             }
@@ -63,20 +68,18 @@ public class ClienteSolrj {
         }
     }
 
-    public void CreateTrec_top_file(ArrayList<TipoQuery> consultas) throws SolrServerException, IOException {
+    public void CreateTrec_top_file(ArrayList<TipoDocumento> consultas) throws SolrServerException, IOException {
         SolrQuery query = new SolrQuery();
         FileWriter trec = new FileWriter("trec_top_file.txt");
 
         for (int i = 0; i < consultas.size(); i++) {
-
-            String[] split = consultas.get(i).getQuery().split("\\s");
-            String CincoPalabras = "";
-            for (int j = 0; j < 5; j++) {
-                CincoPalabras += split[j] + " ";
+            for (int j = 1; j < consultas.get(i).getNumPairs(); j++) {
+                String Name, Value;
+                Name = consultas.get(i).getPair(j).get(0);
+                Value = consultas.get(i).getPair(j).get(1);
+                query.setQuery(Name + ":" + Value);
             }
-            System.out.println("QUERY: " + consultas.get(i).getId() + "--->" + CincoPalabras);
 
-            query.setQuery("text:" + CincoPalabras);
             query.setFields("id,score");
 
             QueryResponse rsp = solr.query(query);
