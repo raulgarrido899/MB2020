@@ -46,7 +46,7 @@ public class AnnieGATE {
         ArrayList<String> DocsToString = new ArrayList<>();
 
         LeerFichero(DocsToString, regex);
-        removeStopwords(DocsToString, regex);
+        removeWordDocument(DocsToString); //Chapuza para que annie no tome como etiqueta la palabra Document
 
         for (int i = 0; i < DocsToString.size(); i++) {
             FeatureMap params = Factory.newFeatureMap();

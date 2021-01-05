@@ -23,7 +23,7 @@ public class ProyectoSolr {
             + "<Location>|</Location>|"
             + "<Organization>|</Organization>|";
 
-    private final String replacePuntuacion = "\\,|\\.|\\-|\\:|\\;";
+    private final String replacePuntuacion = "\\,|\\.|\\-|\\:|\\;|\\)|\\(";
 
     public ProyectoSolr(ClienteSolrj sol) throws IOException {
         DocFilesToString = new ArrayList<>();
@@ -101,7 +101,7 @@ public class ProyectoSolr {
             for (int j = 0; j < result.length - 1; j += 3) {
                 auxDoc = new TipoDocumento();
 
-                String cadenaId = result[j].replaceAll("\\s{2,}", "");
+                String cadenaId = result[j].replaceAll("\\s{1,}", "");
                 auxDoc.addPair("id", cadenaId);
 
                 String title = result[j + 1].replaceAll(replaceBasico, " ");
@@ -143,7 +143,10 @@ public class ProyectoSolr {
 
                 String auxEtiquetas;
                 String query = auxEtiquetas = result[j + 1].replaceAll(replaceBasico, " ");
-                query = query.replaceAll(replaceEtiquetas, "");
+                
+                //Separa la query completa en frases y coge la primera
+                String querySeparada[] = query.split("\\.");
+                query = querySeparada[0].replaceAll(replaceEtiquetas, "");
 
                 auxQUE = new TipoDocumento();
                 auxQUE.addPair("id", id);
@@ -154,7 +157,7 @@ public class ProyectoSolr {
                 
                     
                 for (int zzz = 0; zzz < auxQUE.getNumPairs(); zzz++) {
-                    System.out.print(auxQUE.getPair(zzz).get(0) + ": " + auxQUE.getPair(zzz).get(1) + "\n");
+                    System.out.print(auxQUE.getPair(zzz).get(0) + ":" + auxQUE.getPair(zzz).get(1) + "\n");
                 }
                 System.out.println("\n");
                 TodasQUE.add(auxQUE);
@@ -164,7 +167,7 @@ public class ProyectoSolr {
     }
 
     public void IndexaDocs() throws IOException, GateException, SolrServerException {
-        solrj.AddDoc(parseDocs()); //Indexar documento a solr
+        solrj.IndexDocs(parseDocs()); //Indexar documento a solr
     }
 
     public void solrQUE() throws IOException, GateException, SolrServerException {
@@ -180,7 +183,8 @@ public class ProyectoSolr {
     public static void main(String[] args) throws IOException, SolrServerException, InterruptedException, GateException {
         ProyectoSolr pd = new ProyectoSolr(new ClienteSolrj());
         
+        //pd.IndexaDocs();
         //pd.solrQUE();
-        //pd.TopFile();
+        pd.TopFile();
     }
 }

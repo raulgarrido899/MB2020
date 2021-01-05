@@ -30,7 +30,7 @@ public class Comun {
             + "\\s#\r\n";
 
     public static final String regexNUMfiles = "glob:**LISARJ.NUM";
-
+    /*
     public static final ArrayList<String> STOPWORDS = new ArrayList<>(Arrays.asList(
             "SCHOOL", "BETWEEN", "Document", "SHOULD", "THEY", "STUDY", "ALMOST", "WHICH", "NEEDS", "PLEASED",
             "DOCUMENT", "ETC.", "INCLUDE", "EACH", "VARIOUS", "IN", "SEARCH", "CENTRAL", "LIBRARY", "IS",
@@ -47,7 +47,8 @@ public class Comun {
             "WITHIN", "GENERAL", "ANY", "STUDIES", "SOME", "DEVELOPED", "INTERESTED", "PART", "OF", "REFERENCE",
             "ALSO", "ABOUT", "ACCESS", "ON", "RESULTS", "PROVIDE", "OR", "MANAGEMENT", "ACTIVITIES", "REPORT",
             "USER", "WHAT", "WITH", "LIBRARIES", "COMPUTER", "WILL", "THEIR"));
-
+    */
+    
     //Convierte en String todo lo que lea del fichero separado por el regex
     public static void LeerFichero(ArrayList<String> ArrayString, String regex) throws IOException {
         //Rellena pathFichero con el path de cada fichero dado por la expresion regular
@@ -65,6 +66,7 @@ public class Comun {
         }
     }
 
+    /*
     public static void removeStopwords(ArrayList<String> ArrayString, String regex) throws FileNotFoundException, IOException {
         ArrayList<String> Stopwords = STOPWORDS;
 
@@ -76,7 +78,18 @@ public class Comun {
             }
         }
     }
-
+    */  
+    
+    //Necesario para parsear y no aporta informacion
+    public static void removeWordDocument(ArrayList<String> ArrayString){
+        for (int i = 0; i < ArrayString.size(); i++) {
+             String regexStop = "\\bDocument\\b" ;
+            String reemplazo = ArrayString.get(i).replaceAll(regexStop, "");
+            ArrayString.set(i, reemplazo);
+        }
+        
+    }
+    
     //FICHEROS-------------------------------------------------------------------------------
     //Crea fichero trec_rel_file
     public static void parseNUM() throws IOException {

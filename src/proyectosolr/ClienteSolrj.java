@@ -20,7 +20,7 @@ public class ClienteSolrj {
     }
 
     //Le llegan 500 Documentos
-    public void AddDoc(ArrayList<TipoDocumento> Documentos) throws SolrServerException, IOException {
+    public void IndexDocs(ArrayList<TipoDocumento> Documentos) throws SolrServerException, IOException {
         SolrInputDocument doc = new SolrInputDocument();
 
         //Para todos los documentos
@@ -40,7 +40,6 @@ public class ClienteSolrj {
 
     public void Queries(ArrayList<TipoDocumento> consultas) throws SolrServerException, IOException {
         SolrQuery query = new SolrQuery();
-
         //35 Consultas
         for (int i = 0; i < consultas.size(); i++) {
 
@@ -57,7 +56,6 @@ public class ClienteSolrj {
                 Value = consultas.get(i).getPair(j).get(1);
                 query.setQuery(Name + ":" + Value);
             }
-
             QueryResponse rsp = solr.query(query);
             SolrDocumentList docs = rsp.getResults();
             System.out.println("QUE: " + (i+1));
@@ -79,14 +77,13 @@ public class ClienteSolrj {
                 Value = consultas.get(i).getPair(j).get(1);
                 query.setQuery(Name + ":" + Value);
             }
-
             query.setFields("id,score");
 
             QueryResponse rsp = solr.query(query);
             SolrDocumentList docs = rsp.getResults();
             for (int j = 0; j < docs.size(); j++) {
                 System.out.println((i + 1) + " Q0 " + docs.get(j).get("id") + " " + j + " " + docs.get(j).get("score") + " RaulG");;
-                trec.write((i + 1) + " Q0 " + docs.get(j).get("id") + " " + j + " " + docs.get(j).get("score") + " RaulG");
+                trec.write((i + 1) + " Q0 " + docs.get(j).get("id") + " " + j + " " + docs.get(j).get("score") + " RaulG\n");
             }
             System.out.println("-----------------------------------------------");
         }
